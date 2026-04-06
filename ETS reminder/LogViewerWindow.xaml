@@ -1,0 +1,313 @@
+<Window x:Class="ETS_reminder.LogViewerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ETS Report Logs"
+        Width="900" Height="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResizeWithGrip"
+        Background="{DynamicResource WindowBackground}"
+        PreviewKeyDown="Window_PreviewKeyDown">
+
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="OrangeButton">
+            <Setter Property="Background" Value="#E67E22"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="4,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#D35400"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="{DynamicResource DisabledButtonBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Button" x:Key="QuickAddButton">
+            <Setter Property="Background" Value="#F39C12"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="12,5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="3,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E67E22"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ListBoxItem" x:Key="MonthListItem">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd"
+                                Background="Transparent"
+                                Padding="{TemplateBinding Padding}"
+                                BorderBrush="{DynamicResource ListItemBorder}"
+                                BorderThickness="0,0,0,1">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E67E22"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ListItemHover}"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Menu Bar -->
+        <Menu Grid.Row="0" Background="{DynamicResource MenuBackground}" Foreground="{DynamicResource TextColor}" FontSize="13" Padding="2">
+            <MenuItem Header="_File" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
+                <MenuItem Header="_Fill ETS Report" InputGestureText="Ctrl+N" Click="Menu_FillReport_Click"/>
+                <MenuItem Header="_Open Reports Folder" Click="Menu_OpenFolder_Click"/>
+                <Separator/>
+                <MenuItem Header="E_xit" InputGestureText="Alt+F4" Click="Menu_Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Reports" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
+                <MenuItem Header="_Search Reports" InputGestureText="Ctrl+F" Click="Menu_Search_Click"/>
+                <Separator/>
+                <MenuItem Header="_Copy Month" Click="CopyMonth_Click" x:Name="MenuCopyMonth"/>
+                <MenuItem Header="_Delete Month" Click="DeleteMonth_Click" x:Name="MenuDeleteMonth"/>
+            </MenuItem>
+            <MenuItem Header="_Tools" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
+                <MenuItem Header="_Settings" Click="Menu_Settings_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Search Bar -->
+        <Border Grid.Row="1" Background="{DynamicResource PanelBackground}" Padding="10" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <Button DockPanel.Dock="Right"
+                        Content="Clear"
+                        FontSize="12"
+                        Padding="10,5"
+                        Click="ClearSearch_Click"
+                        Margin="10,0,0,0"
+                        x:Name="ClearSearchButton"
+                        Visibility="Collapsed"/>
+                <TextBlock DockPanel.Dock="Left"
+                           Text="Search:"
+                           FontSize="14"
+                           Foreground="{DynamicResource TextColor}"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"/>
+                <TextBox x:Name="SearchTextBox"
+                         FontSize="14"
+                         Padding="8,5"
+                         Background="{DynamicResource TextBoxBackground}"
+                         Foreground="{DynamicResource TextBoxForeground}"
+                         BorderBrush="{DynamicResource TextBoxBorder}"
+                         TextChanged="SearchTextBox_TextChanged"/>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: Months panel -->
+            <Border Grid.Column="0" Background="{DynamicResource SidePanelBackground}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Months"
+                               FontSize="18" FontWeight="Bold"
+                           Foreground="#E67E22"
+                           Margin="12,15,12,10"/>
+                <ListBox x:Name="MonthsListBox"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         ItemContainerStyle="{StaticResource MonthListItem}"
+                         SelectionChanged="MonthsListBox_SelectionChanged"/>
+            </DockPanel>
+        </Border>
+
+        <!-- Right: Report details -->
+        <DockPanel Grid.Column="1" Margin="15">
+            <!-- Header -->
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                <Button DockPanel.Dock="Right"
+                        x:Name="DeleteMonthButton"
+                        Content="Delete Month"
+                        Style="{StaticResource OrangeButton}"
+                        Click="DeleteMonth_Click"
+                        VerticalAlignment="Center"
+                        Visibility="Collapsed"/>
+                <Button DockPanel.Dock="Right"
+                        x:Name="CopyMonthButton"
+                        Content="Copy Month"
+                        Style="{StaticResource OrangeButton}"
+                        Click="CopyMonth_Click"
+                        VerticalAlignment="Center"
+                        Margin="0,0,10,0"
+                        Visibility="Collapsed"/>
+                <TextBlock x:Name="MonthHeader"
+                           Text="Select a month to view logs"
+                           FontSize="20" FontWeight="Bold"
+                           Foreground="#E67E22"
+                           VerticalAlignment="Center"/>
+            </DockPanel>
+
+            <!-- Add new entry panel -->
+            <Border DockPanel.Dock="Bottom"
+                    Background="{DynamicResource PanelBackground}"
+                    CornerRadius="6"
+                    Padding="12"
+                    Margin="0,10,0,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Add Entry"
+                               FontSize="14" FontWeight="SemiBold"
+                               Foreground="#D35400"
+                               Margin="0,0,0,8"/>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="Date:" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="13"/>
+                        <DatePicker x:Name="AddEntryDatePicker"
+                                    Width="150"
+                                    FontSize="13"
+                                    Margin="0,0,12,0"/>
+                        <TextBlock Text="Quick:" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="13"/>
+                        <Button Content="HOLIDAY" Style="{StaticResource QuickAddButton}" Click="QuickAdd_Holiday_Click"/>
+                        <Button Content="SICK LEAVE" Style="{StaticResource QuickAddButton}" Click="QuickAdd_SickLeave_Click"/>
+                        <Button Content="WFH" Style="{StaticResource QuickAddButton}" Click="QuickAdd_WFH_Click"/>
+                    </StackPanel>
+                    <DockPanel DockPanel.Dock="Top">
+                        <Button DockPanel.Dock="Right"
+                                Content="Save Entry"
+                                Style="{StaticResource OrangeButton}"
+                                Click="SaveEntry_Click"
+                                VerticalAlignment="Center"/>
+                        <TextBox x:Name="AddEntryTextBox"
+                                 FontSize="13"
+                                 Padding="6,4"
+                                 Background="{DynamicResource TextBoxBackground}"
+                                 Foreground="{DynamicResource TextBoxForeground}"
+                                 BorderBrush="{DynamicResource TextBoxBorder}"
+                                 SpellCheck.IsEnabled="True"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,8,0"/>
+                    </DockPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Report list -->
+            <ListView x:Name="ReportListView"
+                      BorderBrush="{DynamicResource BorderColor}"
+                      BorderThickness="1"
+                      Background="{DynamicResource ListBackground}"
+                      SelectionMode="Single"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      PreviewMouseWheel="ReportListView_PreviewMouseWheel">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0"/>
+                        <EventSetter Event="MouseDoubleClick" Handler="ReportListItem_MouseDoubleClick"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="{DynamicResource ListItemBorder}" BorderThickness="0,0,0,1" Padding="8,6" Margin="0,2">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="85"/>
+                                    <ColumnDefinition Width="*" MinWidth="150" MaxWidth="350"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding DateDisplay}"
+                                               FontWeight="SemiBold"
+                                               FontSize="13"
+                                               Foreground="#D35400"/>
+                                    <TextBlock Text="{Binding DayOfWeek}"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource SubTextColor}"/>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding ContentPreview}"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource ContentText}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="10,0"/>
+                                <StackPanel x:Name="ButtonPanel" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                            Visibility="Hidden">
+                                    <Button Content="Copy" ToolTip="Copy to clipboard"
+                                            Style="{StaticResource QuickAddButton}"
+                                            Click="CopyEntry_Click"
+                                            Tag="{Binding FullContent}"/>
+                                    <Button Content="Edit" ToolTip="Edit"
+                                            Style="{StaticResource QuickAddButton}"
+                                            Click="EditEntry_Click"
+                                            Tag="{Binding Date}"/>
+                                    <Button Content="Del" ToolTip="Delete"
+                                            Style="{StaticResource QuickAddButton}"
+                                            Click="DeleteEntry_Click"
+                                            Tag="{Binding Date}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListViewItem}}" Value="True">
+                                <Setter TargetName="ButtonPanel" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </DockPanel>
+        </Grid>
+    </Grid>
+</Window>
