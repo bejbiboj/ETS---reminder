@@ -113,6 +113,68 @@
                 </Border>
             </UniformGrid>
 
+            <!-- This Week -->
+            <Border Background="{DynamicResource PanelBackground}" CornerRadius="8" Padding="15" Margin="0,0,0,10">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="This Week"
+                                   FontSize="14" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextColor}"/>
+                        <TextBlock x:Name="WeekDateRange"
+                                   Text=""
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SubTextColor}"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Day indicators (Mon-Fri) -->
+                    <UniformGrid Columns="5" Margin="0,0,0,10">
+                        <StackPanel HorizontalAlignment="Center">
+                            <Border x:Name="DayMon" Width="36" Height="36" CornerRadius="18" Background="{DynamicResource BorderColor}">
+                                <TextBlock Text="&#x2713;" FontSize="16" FontFamily="Segoe UI Emoji" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" x:Name="DayMonCheck"/>
+                            </Border>
+                            <TextBlock Text="Mon" FontSize="10" Foreground="{DynamicResource SubTextColor}" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center">
+                            <Border x:Name="DayTue" Width="36" Height="36" CornerRadius="18" Background="{DynamicResource BorderColor}">
+                                <TextBlock Text="&#x2713;" FontSize="16" FontFamily="Segoe UI Emoji" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" x:Name="DayTueCheck"/>
+                            </Border>
+                            <TextBlock Text="Tue" FontSize="10" Foreground="{DynamicResource SubTextColor}" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center">
+                            <Border x:Name="DayWed" Width="36" Height="36" CornerRadius="18" Background="{DynamicResource BorderColor}">
+                                <TextBlock Text="&#x2713;" FontSize="16" FontFamily="Segoe UI Emoji" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" x:Name="DayWedCheck"/>
+                            </Border>
+                            <TextBlock Text="Wed" FontSize="10" Foreground="{DynamicResource SubTextColor}" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center">
+                            <Border x:Name="DayThu" Width="36" Height="36" CornerRadius="18" Background="{DynamicResource BorderColor}">
+                                <TextBlock Text="&#x2713;" FontSize="16" FontFamily="Segoe UI Emoji" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" x:Name="DayThuCheck"/>
+                            </Border>
+                            <TextBlock Text="Thu" FontSize="10" Foreground="{DynamicResource SubTextColor}" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center">
+                            <Border x:Name="DayFri" Width="36" Height="36" CornerRadius="18" Background="{DynamicResource BorderColor}">
+                                <TextBlock Text="&#x2713;" FontSize="16" FontFamily="Segoe UI Emoji" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" x:Name="DayFriCheck"/>
+                            </Border>
+                            <TextBlock Text="Fri" FontSize="10" Foreground="{DynamicResource SubTextColor}" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </UniformGrid>
+
+                    <TextBlock x:Name="WeekSummaryText"
+                               Text=""
+                               FontSize="12"
+                               Foreground="{DynamicResource SubTextColor}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
             <!-- Completion Rate -->
             <Border Background="{DynamicResource PanelBackground}" CornerRadius="8" Padding="15" Margin="0,0,0,10">
                 <DockPanel>

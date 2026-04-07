@@ -12,6 +12,20 @@ public class StatsResult
     public DateOnly? LastReportDate { get; init; }
 }
 
+public class WeeklyResult
+{
+    public int ReportsFiled { get; init; }
+    public int WeekdaysSoFar { get; init; }
+    public int CoinsEarned { get; init; }
+    public int CurrentStreak { get; init; }
+    public int NewAchievements { get; init; }
+    public bool IsPerfectWeek { get; init; }
+    public DateOnly WeekStart { get; init; }
+    public DateOnly WeekEnd { get; init; }
+    public List<DateOnly> FiledDates { get; init; } = [];
+    public List<DateOnly> MissedDates { get; init; } = [];
+}
+
 /// <summary>
 /// Coin rules:
 /// - Same-day regular report: 1 coin + streak bonus
@@ -286,5 +300,69 @@ public static class StatsEngine
             d = d.AddDays(1);
         }
         return count;
+    }
+
+    /// <summary>
+    /// Calculates stats for the current week (Monday to Friday).
+    /// </summary>
+    public static WeeklyResult CalculateWeekly()
+    {
+        var today = DateOnly.FromDateTime(
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, App.AppTimeZone));
+
+        // Find Monday of current week
+        var monday = today.AddDays(-(((int)today.DayOfWeek + 6) % 7));
+        var friday = monday.AddDays(4);
+
+        var allDates = ReportStorage.GetAllReportDates()
+            .Select(d => DateOnly.FromDateTime(d))
+            .ToHashSet();
+
+        var filed = new List<DateOnly>();
+        var missed = new List<DateOnly>();
+        var weekdaysSoFar = 0;
+
+        for (int i = 0; i < 5; i++)
+        {
+            var day = monday.AddDays(i);
+            if (day > today) break;
+            weekdaysSoFar++;
+
+            if (allDates.Contains(day))
+                filed.Add(day);
+            else
+                missed.Add(day);
+        }
+
+        // Calculate coins earned this week
+        var fullStats = Calculate();
+        var weekCoins = 0;
+        foreach (var day in filed)
+        {
+            var content = ReportStorage.LoadReport(day.ToDateTime(TimeOnly.MinValue)) ?? "";
+            if (!ReportStorage.IsLeaveEntry(content) &&
+                ReportStorage.WasEnteredOnTime(day.ToDateTime(TimeOnly.MinValue)))
+            {
+                weekCoins++; // base coin (streak bonus is complex to isolate, keep it simple)
+            }
+        }
+
+        var isPerfect = weekdaysSoFar == 5 && filed.Count == 5;
+        var profile = UserProfile.Instance;
+        var newAchievements = profile?.UnlockedAchievements.Count ?? 0;
+
+        return new WeeklyResult
+        {
+            ReportsFiled = filed.Count,
+            WeekdaysSoFar = weekdaysSoFar,
+            CoinsEarned = weekCoins,
+            CurrentStreak = fullStats.CurrentStreak,
+            NewAchievements = newAchievements,
+            IsPerfectWeek = isPerfect,
+            WeekStart = monday,
+            WeekEnd = friday,
+            FiledDates = filed,
+            MissedDates = missed
+        };
     }
 }

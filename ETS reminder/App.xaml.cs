@@ -12,6 +12,7 @@ public partial class App : Application
     private bool _reportFilledToday;
     private DateOnly _lastReportDate;
     private static Mutex? _singleInstanceMutex;
+    private bool _weeklySummaryShownThisWeek;
 
     protected override void OnStartup(System.Windows.StartupEventArgs e)
     {
@@ -153,11 +154,28 @@ public partial class App : Application
         {
             _reportFilledToday = false;
             _lastReportDate = today;
+
+            // Reset weekly summary flag on Monday
+            if (now.DayOfWeek == DayOfWeek.Monday)
+                _weeklySummaryShownThisWeek = false;
         }
 
         // Only remind on weekdays (Mon-Fri)
         if (now.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
             return;
+
+        // Friday weekly summary — show once at reminder time
+        if (now.DayOfWeek == DayOfWeek.Friday && !_weeklySummaryShownThisWeek)
+        {
+            var settings2 = AppSettings.Instance;
+            var summaryMinutes = settings2.ReminderHour * 60 + settings2.ReminderMinute;
+            var nowMinutes = now.Hour * 60 + now.Minute;
+            if (nowMinutes >= summaryMinutes && nowMinutes < summaryMinutes + 5)
+            {
+                _weeklySummaryShownThisWeek = true;
+                ShowWeeklySummaryToast();
+            }
+        }
 
         // Skip if already filled today (from memory)
         if (_reportFilledToday)
@@ -202,12 +220,36 @@ public partial class App : Application
             .Show();
     }
 
+    private void ShowWeeklySummaryToast()
+    {
+        var weekly = StatsEngine.CalculateWeekly();
+        var stats = StatsEngine.Calculate();
+
+        var streakText = stats.CurrentStreak > 0 ? $"Streak: {stats.CurrentStreak} days" : "No active streak";
+        var perfText = weekly.IsPerfectWeek ? "\nPerfect Week! \u2B50" : "";
+
+        new ToastContentBuilder()
+            .AddArgument("action", "openStats")
+            .AddText("\U0001F4CA Weekly Recap — Friday")
+            .AddText($"Reports: {weekly.ReportsFiled}/{weekly.WeekdaysSoFar} | Coins: +{weekly.CoinsEarned} | {streakText}{perfText}")
+            .AddButton(new ToastButton()
+                .SetContent("View Stats")
+                .AddArgument("action", "openStats"))
+            .AddButton(new ToastButton()
+                .SetContent("Dismiss")
+                .AddArgument("action", "dismiss"))
+            .Show();
+    }
+
     private void OnToastActivated(ToastNotificationActivatedEventArgsCompat e)
     {
         var args = ToastArguments.Parse(e.Argument);
-        if (args.TryGetValue("action", out var action) && action == "openReport")
+        if (args.TryGetValue("action", out var action))
         {
-            Current.Dispatcher.Invoke(ShowReportWindow);
+            if (action == "openReport")
+                Current.Dispatcher.Invoke(ShowReportWindow);
+            else if (action == "openStats")
+                Current.Dispatcher.Invoke(ShowStatsDashboard);
         }
     }
 

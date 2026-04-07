@@ -69,8 +69,58 @@ public partial class StatsDashboardWindow : Window
             TodayCoinsDetail.Text = "Fill your report to earn coins!";
         }
 
+        // This Week
+        LoadWeekly();
+
         // Achievements
         LoadAchievements(profile);
+    }
+
+    private void LoadWeekly()
+    {
+        var weekly = StatsEngine.CalculateWeekly();
+
+        WeekDateRange.Text = $"({weekly.WeekStart:MMM dd} \u2013 {weekly.WeekEnd:MMM dd})";
+
+        // Day indicators
+        var dayBorders = new[] { DayMon, DayTue, DayWed, DayThu, DayFri };
+        var dayChecks = new[] { DayMonCheck, DayTueCheck, DayWedCheck, DayThuCheck, DayFriCheck };
+        var today = DateOnly.FromDateTime(
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, App.AppTimeZone));
+
+        for (int i = 0; i < 5; i++)
+        {
+            var day = weekly.WeekStart.AddDays(i);
+            if (weekly.FiledDates.Contains(day))
+            {
+                dayBorders[i].Background = new SolidColorBrush(
+                    (Color)ColorConverter.ConvertFromString("#2ECC71"));
+                dayChecks[i].Visibility = Visibility.Visible;
+            }
+            else if (day < today && weekly.MissedDates.Contains(day))
+            {
+                dayBorders[i].Background = new SolidColorBrush(
+                    (Color)ColorConverter.ConvertFromString("#E74C3C"));
+            }
+            else if (day == today)
+            {
+                dayBorders[i].Background = new SolidColorBrush(
+                    (Color)ColorConverter.ConvertFromString("#E67E22"));
+            }
+            // Future days stay as default BorderColor
+        }
+
+        // Summary text
+        var parts = new List<string>
+        {
+            $"{weekly.ReportsFiled}/{weekly.WeekdaysSoFar} reports filed"
+        };
+        if (weekly.CoinsEarned > 0)
+            parts.Add($"+{weekly.CoinsEarned} coins earned");
+        if (weekly.IsPerfectWeek)
+            parts.Add("Perfect Week!");
+
+        WeekSummaryText.Text = string.Join("  |  ", parts);
     }
 
     private void LoadAchievements(UserProfile? profile)
