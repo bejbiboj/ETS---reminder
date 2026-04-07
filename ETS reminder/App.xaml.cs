@@ -319,12 +319,18 @@ public partial class App : Application
         if (existing != null)
         {
             existing.Activate();
+            existing.Focus();
             return;
         }
 
         var window = new StatsDashboardWindow();
+        // Find an active owner window so the dashboard appears on top
+        var owner = Current.Windows.OfType<System.Windows.Window>().FirstOrDefault(w => w.IsActive && w is not StatsDashboardWindow);
+        if (owner != null)
+            window.Owner = owner;
         window.Show();
         window.Activate();
+        window.Focus();
     }
 
     public void ShowEditProfile()

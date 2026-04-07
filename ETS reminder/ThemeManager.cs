@@ -1,5 +1,4 @@
 using System.Windows.Media;
-using System.Windows.Media;
 using Application = System.Windows.Application;
 using Color = System.Windows.Media.Color;
 
