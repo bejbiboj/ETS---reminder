@@ -153,9 +153,8 @@ public partial class ProfileSetupWindow : Window
                 BorderBrush = System.Windows.Media.Brushes.Transparent,
                 Cursor = System.Windows.Input.Cursors.Hand,
                 Margin = new System.Windows.Thickness(3),
-                ToolTip = isOwned ? avatar.Name : $"{avatar.Name} ({avatar.Price} coins)",
-                IsEnabled = isOwned,
-                Opacity = isOwned ? 1.0 : 0.4
+                ToolTip = isOwned ? avatar.Name : $"\U0001F512 {avatar.Name} — {avatar.Price} coins (click to buy)",
+                Opacity = isOwned ? 1.0 : 0.6
             };
             btn.Click += AvatarButton_Click;
             AvatarPanel.Children.Add(btn);
