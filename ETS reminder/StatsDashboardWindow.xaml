@@ -61,15 +61,31 @@
             <!-- Stats Grid -->
             <UniformGrid Columns="2" Margin="0,0,0,10">
                 <!-- Current Streak -->
-                <Border Background="{DynamicResource PanelBackground}" CornerRadius="8" Padding="15" Margin="0,0,5,10">
+                <Border x:Name="StreakBorder" Background="{DynamicResource PanelBackground}" CornerRadius="8" Padding="15" Margin="0,0,5,10">
                     <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="&#x1F525;" FontSize="22" FontFamily="Segoe UI Emoji" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="StreakFireEmoji" Text="&#x1F525;" FontSize="22" FontFamily="Segoe UI Emoji" HorizontalAlignment="Center"
+                                   RenderTransformOrigin="0.5,0.5">
+                            <TextBlock.RenderTransform>
+                                <ScaleTransform x:Name="FireScale" ScaleX="1" ScaleY="1"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
                         <TextBlock x:Name="CurrentStreakText"
                                    Text="0" FontSize="28" FontWeight="Bold"
-                                   Foreground="#E67E22" HorizontalAlignment="Center"/>
+                                   Foreground="#E67E22" HorizontalAlignment="Center"
+                                   RenderTransformOrigin="0.5,0.5">
+                            <TextBlock.RenderTransform>
+                                <ScaleTransform x:Name="StreakNumberScale" ScaleX="1" ScaleY="1"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
                         <TextBlock Text="Current Streak"
                                    FontSize="12" Foreground="{DynamicResource SubTextColor}"
                                    HorizontalAlignment="Center"/>
+                        <!-- Milestone banner -->
+                        <Border x:Name="MilestoneBanner" CornerRadius="4" Padding="8,3" Margin="0,6,0,0"
+                                Background="#E67E22" Opacity="0" HorizontalAlignment="Center">
+                            <TextBlock x:Name="MilestoneText" Text="" FontSize="11" FontWeight="Bold"
+                                       Foreground="White" HorizontalAlignment="Center"/>
+                        </Border>
                     </StackPanel>
                 </Border>
 

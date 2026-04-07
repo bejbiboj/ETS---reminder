@@ -237,7 +237,12 @@
                                FontSize="11"
                                Foreground="#E67E22"
                                VerticalAlignment="Center"
-                               Margin="8,0,0,0"/>
+                               Margin="8,0,0,0"
+                               RenderTransformOrigin="0.5,0.5">
+                        <TextBlock.RenderTransform>
+                            <ScaleTransform x:Name="MenuStreakScale" ScaleX="1" ScaleY="1"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
                 </StackPanel>
             </DockPanel>
         </Grid>

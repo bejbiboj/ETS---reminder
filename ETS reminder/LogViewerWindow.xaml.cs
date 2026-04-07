@@ -30,7 +30,27 @@ public partial class LogViewerWindow : Window
 
         var stats = StatsEngine.Calculate();
         if (stats.CurrentStreak > 0)
+        {
             MenuStreakText.Text = $"\U0001f525 {stats.CurrentStreak}";
+
+            // Pulse the streak indicator if at a milestone
+            if (stats.CurrentStreak >= 5)
+            {
+                var pulse = new System.Windows.Media.Animation.DoubleAnimation
+                {
+                    From = 1.0, To = 1.3,
+                    Duration = TimeSpan.FromMilliseconds(400),
+                    AutoReverse = true,
+                    RepeatBehavior = new System.Windows.Media.Animation.RepeatBehavior(2),
+                    EasingFunction = new System.Windows.Media.Animation.SineEase
+                        { EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut }
+                };
+                MenuStreakScale.BeginAnimation(
+                    System.Windows.Media.ScaleTransform.ScaleXProperty, pulse);
+                MenuStreakScale.BeginAnimation(
+                    System.Windows.Media.ScaleTransform.ScaleYProperty, pulse);
+            }
+        }
     }
 
     private void SetupSearchTimer()

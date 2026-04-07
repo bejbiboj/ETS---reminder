@@ -1,5 +1,7 @@
 using System.Windows;
+using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using Color = System.Windows.Media.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
 
@@ -52,6 +54,9 @@ public partial class StatsDashboardWindow : Window
         TotalCoinsText.Text = stats.TotalCoins.ToString();
         CompletionRateText.Text = $"{stats.CompletionRatePercent}%";
 
+        // Animate streak if at a milestone
+        AnimateStreak(stats.CurrentStreak);
+
         // Today
         if (stats.CoinsEarnedToday > 0)
         {
@@ -71,6 +76,95 @@ public partial class StatsDashboardWindow : Window
 
         // Achievements
         LoadAchievements(profile);
+    }
+
+    private void AnimateStreak(int streak)
+    {
+        if (streak < 3)
+        {
+            MilestoneBanner.Opacity = 0;
+            return;
+        }
+
+        // Determine milestone text
+        string? milestoneLabel = streak switch
+        {
+            >= 100 => "UNBREAKABLE!",
+            >= 50 => "IRON WILL!",
+            >= 20 => "LEGENDARY!",
+            >= 10 => "UNSTOPPABLE!",
+            >= 5 => "ON FIRE!",
+            >= 3 => "WARMING UP!",
+            _ => null
+        };
+
+        // Bounce animation on the streak number
+        var numberBounce = new DoubleAnimation
+        {
+            From = 0.5, To = 1.0,
+            Duration = TimeSpan.FromMilliseconds(400),
+            EasingFunction = new ElasticEase { EasingMode = EasingMode.EaseOut, Oscillations = 1, Springiness = 4 }
+        };
+        StreakNumberScale.BeginAnimation(ScaleTransform.ScaleXProperty, numberBounce);
+        StreakNumberScale.BeginAnimation(ScaleTransform.ScaleYProperty, numberBounce);
+
+        // Fire emoji pulse animation
+        var firePulse = new DoubleAnimation
+        {
+            From = 1.0, To = 1.4,
+            Duration = TimeSpan.FromMilliseconds(300),
+            AutoReverse = true,
+            RepeatBehavior = new RepeatBehavior(streak >= 10 ? 3 : 2),
+            EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+        };
+        FireScale.BeginAnimation(ScaleTransform.ScaleXProperty, firePulse);
+        FireScale.BeginAnimation(ScaleTransform.ScaleYProperty, firePulse);
+
+        // Glow: color animation on the streak number (orange -> gold -> orange)
+        if (streak >= 5)
+        {
+            var glow = new ColorAnimation
+            {
+                From = (Color)ColorConverter.ConvertFromString("#E67E22"),
+                To = (Color)ColorConverter.ConvertFromString("#FFD700"),
+                Duration = TimeSpan.FromMilliseconds(500),
+                AutoReverse = true,
+                RepeatBehavior = new RepeatBehavior(2)
+            };
+            var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E67E22"));
+            CurrentStreakText.Foreground = brush;
+            brush.BeginAnimation(SolidColorBrush.ColorProperty, glow);
+        }
+
+        // Milestone banner slide-in
+        if (milestoneLabel != null)
+        {
+            MilestoneText.Text = milestoneLabel;
+
+            var fadeIn = new DoubleAnimation
+            {
+                From = 0, To = 1,
+                Duration = TimeSpan.FromMilliseconds(400),
+                BeginTime = TimeSpan.FromMilliseconds(300)
+            };
+            MilestoneBanner.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+
+            // Change banner color based on streak tier
+            var bannerColor = streak switch
+            {
+                >= 50 => "#FFD700",
+                >= 20 => "#9B59B6",
+                >= 10 => "#E74C3C",
+                >= 5 => "#E67E22",
+                _ => "#3498DB"
+            };
+            MilestoneBanner.Background = new SolidColorBrush(
+                (Color)ColorConverter.ConvertFromString(bannerColor));
+        }
+        else
+        {
+            MilestoneBanner.Opacity = 0;
+        }
     }
 
     private void LoadWeekly()
