@@ -445,9 +445,9 @@ public partial class LogViewerWindow : Window
         {
             Maximize_Click(sender, e);
         }
-        else
+        else if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
         {
-            DragMove();
+            try { DragMove(); } catch { }
         }
     }
 
