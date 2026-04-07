@@ -253,10 +253,13 @@
                         <DatePicker x:Name="AddEntryDatePicker"
                                     Width="150"
                                     FontSize="13"
-                                    Margin="0,0,12,0"/>
+                                    Margin="0,0,12,0"
+                                    DisplayDateEnd="{x:Static sys:DateTime.Today}"
+                                    xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
                         <TextBlock Text="Quick:" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="13"/>
                         <Button Content="HOLIDAY" Style="{StaticResource QuickAddButton}" Click="QuickAdd_Holiday_Click"/>
                         <Button Content="SICK LEAVE" Style="{StaticResource QuickAddButton}" Click="QuickAdd_SickLeave_Click"/>
+                        <Button Content="VACATION" Style="{StaticResource QuickAddButton}" Click="QuickAdd_Vacation_Click"/>
                         <Button Content="WFH" Style="{StaticResource QuickAddButton}" Click="QuickAdd_WFH_Click"/>
                     </StackPanel>
                     <DockPanel DockPanel.Dock="Top">

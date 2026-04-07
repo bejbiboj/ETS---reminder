@@ -155,7 +155,7 @@
             </Border>
 
             <!-- Streak Bonus Info -->
-            <Border Background="{DynamicResource PanelBackground}" CornerRadius="8" Padding="15">
+            <Border Background="{DynamicResource PanelBackground}" CornerRadius="8" Padding="15" Margin="0,0,0,10">
                 <StackPanel>
                     <TextBlock Text="Streak Bonuses"
                                FontSize="14" FontWeight="SemiBold"
@@ -169,6 +169,24 @@
                                FontSize="12" Foreground="{DynamicResource SubTextColor}"/>
                     <TextBlock Text="20+ days: +5 bonus coins per report"
                                FontSize="12" Foreground="{DynamicResource SubTextColor}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Rules Info -->
+            <Border Background="{DynamicResource PanelBackground}" CornerRadius="8" Padding="15">
+                <StackPanel>
+                    <TextBlock Text="Coin Rules"
+                               FontSize="14" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextColor}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Text="&#x2022; Same-day reports earn coins + streak bonus"
+                               FontSize="12" Foreground="{DynamicResource SubTextColor}" TextWrapping="Wrap"/>
+                    <TextBlock Text="&#x2022; Backdated reports: saved for records, 0 coins"
+                               FontSize="12" Foreground="{DynamicResource SubTextColor}" TextWrapping="Wrap"/>
+                    <TextBlock Text="&#x2022; Holiday / Sick / Vacation: 0 coins, streak preserved"
+                               FontSize="12" Foreground="{DynamicResource SubTextColor}" TextWrapping="Wrap"/>
+                    <TextBlock Text="&#x2022; Future dates are blocked"
+                               FontSize="12" Foreground="{DynamicResource SubTextColor}" TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>
 

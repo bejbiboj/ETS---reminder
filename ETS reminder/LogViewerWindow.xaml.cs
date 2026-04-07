@@ -188,6 +188,11 @@ public partial class LogViewerWindow : Window
         AddEntryTextBox.Text = "SICK LEAVE";
     }
 
+    private void QuickAdd_Vacation_Click(object sender, RoutedEventArgs e)
+    {
+        AddEntryTextBox.Text = "VACATION";
+    }
+
     private void QuickAdd_WFH_Click(object sender, RoutedEventArgs e)
     {
         AddEntryTextBox.Text = "WFH - Working from home";
@@ -198,6 +203,15 @@ public partial class LogViewerWindow : Window
         if (AddEntryDatePicker.SelectedDate is not { } selectedDate)
         {
             MessageBox.Show("Please select a date.", "No Date", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        // Block future dates
+        var today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, App.AppTimeZone).Date;
+        if (selectedDate.Date > today)
+        {
+            MessageBox.Show("Cannot create reports for future dates.",
+                "Future Date", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

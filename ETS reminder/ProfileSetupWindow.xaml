@@ -54,6 +54,7 @@
         </Style>
     </Window.Resources>
 
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
     <Grid Margin="30">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -127,4 +128,5 @@
                 HorizontalAlignment="Center"
                 Click="SaveButton_Click"/>
     </Grid>
+    </ScrollViewer>
 </Window>

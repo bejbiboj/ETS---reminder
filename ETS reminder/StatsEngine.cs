@@ -12,45 +12,64 @@ public class StatsResult
     public DateOnly? LastReportDate { get; init; }
 }
 
+/// <summary>
+/// Coin rules:
+/// - Same-day regular report: 1 coin + streak bonus
+/// - Backdated regular report: 0 coins (useful for records, no reward)
+/// - Leave entries (Holiday/Sick/Vacation): 0 coins, streak preserved (streak freeze)
+/// - Future dates: blocked at UI level, cannot be entered
+/// </summary>
 public static class StatsEngine
 {
+    private record ReportInfo(DateOnly Date, bool IsLeave, bool WasOnTime);
+
     public static StatsResult Calculate()
     {
         var allDates = ReportStorage.GetAllReportDates()
-            .Select(DateOnly.FromDateTime)
+            .Select(d => DateOnly.FromDateTime(d))
             .Distinct()
             .OrderBy(d => d)
             .ToList();
 
         if (allDates.Count == 0)
-        {
             return new StatsResult();
-        }
 
-        var totalReports = allDates.Count;
-        var firstReport = allDates[0];
-        var lastReport = allDates[^1];
+        // Build report info with leave/on-time status
+        var reports = allDates.Select(d =>
+        {
+            var content = ReportStorage.LoadReport(d.ToDateTime(TimeOnly.MinValue)) ?? "";
+            var isLeave = ReportStorage.IsLeaveEntry(content);
+            var wasOnTime = ReportStorage.WasEnteredOnTime(d.ToDateTime(TimeOnly.MinValue));
+            return new ReportInfo(d, isLeave, wasOnTime);
+        }).ToList();
 
-        // Calculate current streak (consecutive weekdays from today going back)
         var today = DateOnly.FromDateTime(
             TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, App.AppTimeZone));
+
         var reportSet = allDates.ToHashSet();
-        var currentStreak = CalculateCurrentStreak(today, reportSet);
+        var leaveSet = reports.Where(r => r.IsLeave).Select(r => r.Date).ToHashSet();
 
-        // Calculate longest streak ever
-        var longestStreak = CalculateLongestStreak(allDates);
+        // Current streak (leave days don't break it, but don't count toward it)
+        var currentStreak = CalculateCurrentStreak(today, reportSet, leaveSet);
 
-        // Calculate coins: 1 per report + streak bonuses
-        var totalCoins = CalculateCoins(allDates);
+        // Longest streak ever
+        var longestStreak = CalculateLongestStreak(allDates, leaveSet);
+
+        // Coins: only same-day non-leave reports earn coins
+        var totalCoins = CalculateCoins(reports);
 
         // Today's coins
-        var todayCoins = reportSet.Contains(today) ? CalculateStreakBonus(currentStreak) + 1 : 0;
+        var todayReport = reports.FirstOrDefault(r => r.Date == today);
+        var todayCoins = 0;
+        if (todayReport != null && !todayReport.IsLeave && todayReport.WasOnTime)
+            todayCoins = 1 + CalculateStreakBonus(currentStreak);
 
-        // Completion rate: reports filed vs weekdays since first report
+        // Completion rate
+        var firstReport = allDates[0];
         var totalWeekdays = CountWeekdays(firstReport, today);
-        var completionRate = totalWeekdays > 0 ? (double)totalReports / totalWeekdays * 100 : 0;
+        var completionRate = totalWeekdays > 0 ? (double)allDates.Count / totalWeekdays * 100 : 0;
 
-        // Update profile with persistent stats
+        // Update profile
         var profile = UserProfile.Instance;
         if (profile != null)
         {
@@ -62,18 +81,23 @@ public static class StatsEngine
 
         return new StatsResult
         {
-            TotalReports = totalReports,
+            TotalReports = allDates.Count,
             CurrentStreak = currentStreak,
             LongestStreak = Math.Max(longestStreak, profile?.LongestStreak ?? 0),
             TotalCoins = totalCoins,
             CoinsEarnedToday = todayCoins,
             CompletionRatePercent = Math.Round(completionRate, 1),
             FirstReportDate = firstReport,
-            LastReportDate = lastReport
+            LastReportDate = allDates[^1]
         };
     }
 
-    private static int CalculateCurrentStreak(DateOnly today, HashSet<DateOnly> reportDates)
+    /// <summary>
+    /// Current streak: counts consecutive weekdays with a report (or leave).
+    /// Leave days don't break the streak but don't add to the count.
+    /// Only actual reports increment the streak number.
+    /// </summary>
+    private static int CalculateCurrentStreak(DateOnly today, HashSet<DateOnly> reportDates, HashSet<DateOnly> leaveDates)
     {
         var streak = 0;
         var checkDate = today;
@@ -82,59 +106,145 @@ public static class StatsEngine
         while (checkDate.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
             checkDate = checkDate.AddDays(-1);
 
-        // If today is a weekday and no report yet, start from yesterday
-        if (!reportDates.Contains(checkDate))
+        // If today is a weekday with no report and no leave, start from previous weekday
+        if (!reportDates.Contains(checkDate) && !leaveDates.Contains(checkDate))
             checkDate = PreviousWeekday(checkDate);
 
-        while (reportDates.Contains(checkDate))
+        while (true)
         {
-            streak++;
-            checkDate = PreviousWeekday(checkDate);
+            if (leaveDates.Contains(checkDate))
+            {
+                // Leave day: streak freeze — skip without breaking
+                checkDate = PreviousWeekday(checkDate);
+                continue;
+            }
+
+            if (reportDates.Contains(checkDate))
+            {
+                streak++;
+                checkDate = PreviousWeekday(checkDate);
+            }
+            else
+            {
+                break; // No report, no leave — streak broken
+            }
         }
 
         return streak;
     }
 
-    private static int CalculateLongestStreak(List<DateOnly> sortedDates)
+    /// <summary>
+    /// Longest streak: same logic as current streak but scanned across all dates.
+    /// </summary>
+    private static int CalculateLongestStreak(List<DateOnly> sortedDates, HashSet<DateOnly> leaveDates)
     {
         if (sortedDates.Count == 0) return 0;
 
-        var longest = 1;
-        var current = 1;
+        var longest = 0;
+        var current = 0;
 
-        for (int i = 1; i < sortedDates.Count; i++)
+        for (int i = 0; i < sortedDates.Count; i++)
         {
-            var expected = NextWeekday(sortedDates[i - 1]);
-            if (sortedDates[i] == expected)
+            if (leaveDates.Contains(sortedDates[i]))
             {
-                current++;
-                if (current > longest)
-                    longest = current;
+                // Leave: check if chain is still connected
+                if (i > 0 && IsNextWeekdayOrLeaveChain(sortedDates[i - 1], sortedDates[i], leaveDates))
+                {
+                    // Don't increment streak count, but don't break it
+                }
+                else if (i == 0)
+                {
+                    // First entry is leave — no streak started
+                }
+                continue;
             }
-            else
+
+            // Regular report
+            if (i == 0 || !IsConnected(sortedDates, i, leaveDates))
             {
                 current = 1;
             }
+            else
+            {
+                current++;
+            }
+
+            if (current > longest)
+                longest = current;
         }
 
         return longest;
     }
 
-    private static int CalculateCoins(List<DateOnly> sortedDates)
+    /// <summary>
+    /// Checks if sortedDates[i] is connected to the previous report via consecutive weekdays
+    /// (with leave days bridging gaps).
+    /// </summary>
+    private static bool IsConnected(List<DateOnly> sortedDates, int i, HashSet<DateOnly> leaveDates)
     {
-        if (sortedDates.Count == 0) return 0;
+        // Walk backwards from sortedDates[i] to find the previous non-leave entry
+        var current = PreviousWeekday(sortedDates[i]);
+        while (leaveDates.Contains(current))
+            current = PreviousWeekday(current);
 
+        // Find the previous non-leave date in sortedDates
+        for (int j = i - 1; j >= 0; j--)
+        {
+            if (!leaveDates.Contains(sortedDates[j]))
+                return sortedDates[j] == current;
+        }
+
+        return false;
+    }
+
+    private static bool IsNextWeekdayOrLeaveChain(DateOnly prev, DateOnly current, HashSet<DateOnly> leaveDates)
+    {
+        var expected = NextWeekday(prev);
+        while (expected < current)
+        {
+            if (!leaveDates.Contains(expected))
+                return false;
+            expected = NextWeekday(expected);
+        }
+        return expected == current;
+    }
+
+    /// <summary>
+    /// Coins: only same-day (non-backdated) regular reports earn coins.
+    /// Leave entries earn 0. Backdated entries earn 0.
+    /// </summary>
+    private static int CalculateCoins(List<ReportInfo> reports)
+    {
         var totalCoins = 0;
         var streak = 0;
 
-        for (int i = 0; i < sortedDates.Count; i++)
-        {
-            if (i > 0 && sortedDates[i] == NextWeekday(sortedDates[i - 1]))
-                streak++;
-            else
-                streak = 1;
+        // We need to track streak including leave freezes for bonus calculation
+        var leaveDates = reports.Where(r => r.IsLeave).Select(r => r.Date).ToHashSet();
 
-            totalCoins += 1 + CalculateStreakBonus(streak);
+        for (int i = 0; i < reports.Count; i++)
+        {
+            var r = reports[i];
+
+            if (r.IsLeave)
+                continue; // 0 coins, but doesn't break streak
+
+            // Calculate current streak position
+            if (i > 0)
+            {
+                var prevNonLeave = reports.Take(i).LastOrDefault(p => !p.IsLeave);
+                if (prevNonLeave != null && IsNextWeekdayOrLeaveChain(prevNonLeave.Date, r.Date, leaveDates))
+                    streak++;
+                else
+                    streak = 1;
+            }
+            else
+            {
+                streak = 1;
+            }
+
+            // Only award coins if entered on time (not backdated)
+            if (r.WasOnTime)
+                totalCoins += 1 + CalculateStreakBonus(streak);
         }
 
         return totalCoins;

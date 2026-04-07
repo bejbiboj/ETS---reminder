@@ -4,6 +4,9 @@ namespace ETS_reminder;
 
 public static class ReportStorage
 {
+    // Leave-type keywords that preserve streak but earn 0 coins
+    private static readonly string[] LeaveKeywords = ["HOLIDAY", "SICK LEAVE", "VACATION"];
+
     public static string GetReportsFolder()
     {
         var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -31,7 +34,63 @@ Report:
 """;
 
         File.WriteAllText(filePath, fullContent);
+
+        // Save metadata (creation timestamp) for coin eligibility
+        SaveMetadata(date);
+
         return filePath;
+    }
+
+    /// <summary>
+    /// Returns true if the report content is a leave entry (holiday, sick leave, vacation).
+    /// </summary>
+    public static bool IsLeaveEntry(string content)
+    {
+        var trimmed = content.Trim().ToUpperInvariant();
+        return LeaveKeywords.Any(k => trimmed == k);
+    }
+
+    /// <summary>
+    /// Returns true if the report for the given date was entered on the same day (not backdated).
+    /// </summary>
+    public static bool WasEnteredOnTime(DateTime reportDate)
+    {
+        var metaPath = GetMetadataPath(reportDate);
+        if (!File.Exists(metaPath)) return true; // Legacy reports without metadata get benefit of the doubt
+
+        try
+        {
+            var createdDateStr = File.ReadAllText(metaPath).Trim();
+            if (DateOnly.TryParse(createdDateStr, out var createdDate))
+            {
+                return createdDate == DateOnly.FromDateTime(reportDate);
+            }
+        }
+        catch { }
+        return true; // If metadata is corrupt, give benefit of the doubt
+    }
+
+    private static string GetMetadataPath(DateTime date)
+    {
+        var folder = GetReportsFolder();
+        return Path.Combine(folder, $"ETS_{date:yyyy-MM-dd}.meta");
+    }
+
+    private static void SaveMetadata(DateTime reportDate)
+    {
+        try
+        {
+            var today = DateOnly.FromDateTime(
+                TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, AppSettings.Instance.GetTimeZone()));
+            var metaPath = GetMetadataPath(reportDate);
+
+            // Only write metadata if it doesn't exist yet (preserve original entry date)
+            if (!File.Exists(metaPath))
+            {
+                File.WriteAllText(metaPath, today.ToString("yyyy-MM-dd"));
+            }
+        }
+        catch { }
     }
 
     public static string? LoadReport(DateTime date)
@@ -117,6 +176,11 @@ Report:
 
         if (File.Exists(filePath))
             File.Delete(filePath);
+
+        // Clean up metadata
+        var metaPath = GetMetadataPath(date);
+        if (File.Exists(metaPath))
+            File.Delete(metaPath);
     }
 
     public static int DeleteReportsForMonth(int year, int month)
