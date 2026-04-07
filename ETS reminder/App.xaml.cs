@@ -69,6 +69,7 @@ public partial class App : Application
         contextMenu.Items.Add("Open Reports Folder", null, (_, _) => OpenReportsFolder());
         contextMenu.Items.Add("-");
         contextMenu.Items.Add("Stats Dashboard", null, (_, _) => ShowStatsDashboard());
+        contextMenu.Items.Add("Theme Shop", null, (_, _) => ShowThemeShop());
         contextMenu.Items.Add("Edit Profile", null, (_, _) => ShowEditProfile());
         contextMenu.Items.Add("Settings", null, (_, _) => ShowSettingsWindow());
         contextMenu.Items.Add("-");
@@ -331,6 +332,24 @@ public partial class App : Application
         window.Show();
         window.Activate();
         window.Focus();
+    }
+
+    public void ShowThemeShop()
+    {
+        var existing = Current.Windows.OfType<ThemeShopWindow>().FirstOrDefault();
+        if (existing != null)
+        {
+            existing.Activate();
+            existing.Focus();
+            return;
+        }
+
+        var window = new ThemeShopWindow();
+        var owner = Current.Windows.OfType<System.Windows.Window>().FirstOrDefault(w => w.IsActive && w is not ThemeShopWindow);
+        if (owner != null)
+            window.Owner = owner;
+        window.Show();
+        window.Activate();
     }
 
     public void ShowEditProfile()

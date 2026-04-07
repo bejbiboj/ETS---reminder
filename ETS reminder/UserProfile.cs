@@ -11,9 +11,21 @@ public class UserProfile
     public string AvatarColor { get; set; } = "#E67E22";
     public string AuthProvider { get; set; } = "Local";
     public int TotalCoins { get; set; }
+    public int BonusCoins { get; set; }
     public int LongestStreak { get; set; }
     public List<string> UnlockedAchievements { get; set; } = [];
+    public List<string> UnlockedThemes { get; set; } = ["default_dark", "default_light"];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public bool SpendCoins(int amount)
+    {
+        if (TotalCoins < amount) return false;
+        // Deduct from BonusCoins since earned coins are recalculated by StatsEngine
+        BonusCoins = Math.Max(0, BonusCoins - amount);
+        TotalCoins -= amount;
+        Save();
+        return true;
+    }
 
     public string Initials
     {

@@ -89,16 +89,18 @@ public static class StatsEngine
         {
             if (longestStreak > profile.LongestStreak)
                 profile.LongestStreak = longestStreak;
-            profile.TotalCoins = totalCoins;
+            profile.TotalCoins = totalCoins + profile.BonusCoins;
             profile.Save();
         }
+
+        var finalCoins = totalCoins + (profile?.BonusCoins ?? 0);
 
         return new StatsResult
         {
             TotalReports = allDates.Count,
             CurrentStreak = currentStreak,
             LongestStreak = Math.Max(longestStreak, profile?.LongestStreak ?? 0),
-            TotalCoins = totalCoins,
+            TotalCoins = finalCoins,
             CoinsEarnedToday = todayCoins,
             CompletionRatePercent = Math.Round(completionRate, 1),
             FirstReportDate = firstReport,

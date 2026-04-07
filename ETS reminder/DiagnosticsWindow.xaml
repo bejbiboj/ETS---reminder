@@ -1,0 +1,111 @@
+<Window x:Class="ETS_reminder.DiagnosticsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="System Diagnostics"
+        Width="400" Height="480"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="{DynamicResource WindowBackground}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+
+            <TextBlock Text="Advanced Diagnostics"
+                       FontSize="18" FontWeight="Bold"
+                       Foreground="#E74C3C"
+                       Margin="0,0,0,5"/>
+            <TextBlock x:Name="StatusLabel"
+                       Text=""
+                       FontSize="11"
+                       Foreground="{DynamicResource SubTextColor}"
+                       Margin="0,0,0,15"/>
+
+            <!-- Calibration -->
+            <Border Background="{DynamicResource PanelBackground}" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                <StackPanel>
+                    <TextBlock Text="Offset Calibration" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextColor}" Margin="0,0,0,6"/>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="Apply" Click="SetCoins_Click"
+                                Width="60" Height="28" FontSize="12"
+                                Background="#E67E22" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                        <TextBox x:Name="CoinAmountBox" FontSize="14" Padding="6,4"
+                                 Background="{DynamicResource TextBoxBackground}"
+                                 Foreground="{DynamicResource TextBoxForeground}"
+                                 BorderBrush="{DynamicResource TextBoxBorder}"
+                                 Margin="0,0,8,0"/>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Quick Adjust -->
+            <Border Background="{DynamicResource PanelBackground}" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                <StackPanel>
+                    <TextBlock Text="Quick Adjust" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextColor}" Margin="0,0,0,6"/>
+                    <WrapPanel>
+                        <Button Content="+10" Tag="10" Click="AddCoins_Click" Margin="3" Padding="12,5"
+                                Background="#2ECC71" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                        <Button Content="+50" Tag="50" Click="AddCoins_Click" Margin="3" Padding="12,5"
+                                Background="#2ECC71" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                        <Button Content="+100" Tag="100" Click="AddCoins_Click" Margin="3" Padding="12,5"
+                                Background="#2ECC71" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                        <Button Content="+500" Tag="500" Click="AddCoins_Click" Margin="3" Padding="12,5"
+                                Background="#E67E22" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Flags -->
+            <Border Background="{DynamicResource PanelBackground}" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                <StackPanel>
+                    <TextBlock Text="Feature Flags" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextColor}" Margin="0,0,0,6"/>
+                    <TextBlock x:Name="AchievementStatusText" Text="" FontSize="11"
+                               Foreground="{DynamicResource SubTextColor}" Margin="0,0,0,6"/>
+                    <WrapPanel>
+                        <Button Content="Enable All" Click="UnlockAllAchievements_Click" Margin="3" Padding="12,5"
+                                Background="#9B59B6" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                        <Button Content="Clear" Click="ResetAchievements_Click" Margin="3" Padding="12,5"
+                                Background="#E74C3C" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Resources -->
+            <Border Background="{DynamicResource PanelBackground}" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                <StackPanel>
+                    <TextBlock Text="Resource Pool" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextColor}" Margin="0,0,0,6"/>
+                    <TextBlock x:Name="ThemeStatusText" Text="" FontSize="11"
+                               Foreground="{DynamicResource SubTextColor}" Margin="0,0,0,6"/>
+                    <WrapPanel>
+                        <Button Content="Load All" Click="UnlockAllThemes_Click" Margin="3" Padding="12,5"
+                                Background="#3498DB" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                        <Button Content="Flush" Click="ResetThemes_Click" Margin="3" Padding="12,5"
+                                Background="#E74C3C" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Counter -->
+            <Border Background="{DynamicResource PanelBackground}" CornerRadius="6" Padding="12" Margin="0,0,0,10">
+                <StackPanel>
+                    <TextBlock Text="Counter Override" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextColor}" Margin="0,0,0,6"/>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="Apply" Click="SetStreak_Click"
+                                Width="60" Height="28" FontSize="12"
+                                Background="#E67E22" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                        <TextBox x:Name="StreakBox" FontSize="14" Padding="6,4"
+                                 Background="{DynamicResource TextBoxBackground}"
+                                 Foreground="{DynamicResource TextBoxForeground}"
+                                 BorderBrush="{DynamicResource TextBoxBorder}"
+                                 Margin="0,0,8,0"/>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Window>

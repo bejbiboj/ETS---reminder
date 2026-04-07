@@ -76,7 +76,17 @@ public partial class SettingsWindow : Window
 
         settings.Save();
 
-        // Apply theme immediately
+        // Apply theme immediately — sync active theme with dark mode toggle
+        if (settings.DarkMode)
+        {
+            if (settings.ActiveThemeId == "default_light")
+                settings.ActiveThemeId = "default_dark";
+        }
+        else
+        {
+            settings.ActiveThemeId = "default_light";
+        }
+        settings.Save();
         ThemeManager.ApplyTheme(settings.DarkMode);
 
         Close();

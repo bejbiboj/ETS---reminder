@@ -1,0 +1,127 @@
+<Window x:Class="ETS_reminder.ThemeShopWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Theme Shop"
+        Width="550" Height="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="{DynamicResource WindowBackground}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{DynamicResource PanelBackground}" Padding="20,15">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#x1F4B0;" FontSize="16" FontFamily="Segoe UI Emoji" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="CoinBalanceText"
+                                   Text="0"
+                                   FontSize="20" FontWeight="Bold"
+                                   Foreground="#E67E22"
+                                   VerticalAlignment="Center"
+                                   Margin="6,0,0,0"/>
+                        <TextBlock Text=" coins"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource SubTextColor}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Theme Shop"
+                               FontSize="22" FontWeight="Bold"
+                               Foreground="{DynamicResource TextColor}"/>
+                    <TextBlock Text="Unlock new color themes with your coins"
+                               FontSize="12"
+                               Foreground="{DynamicResource SubTextColor}"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Theme List -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="15">
+            <ItemsControl x:Name="ThemeList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{DynamicResource PanelBackground}"
+                                CornerRadius="8" Padding="12" Margin="0,0,0,10"
+                                BorderBrush="{Binding BorderColor}" BorderThickness="{Binding BorderWidth}">
+                            <DockPanel>
+                                <!-- Action Button (right) -->
+                                <Button DockPanel.Dock="Right"
+                                        Content="{Binding ButtonText}"
+                                        Tag="{Binding Id}"
+                                        Click="ThemeAction_Click"
+                                        IsEnabled="{Binding ButtonEnabled}"
+                                        Width="90" Height="32"
+                                        FontSize="12" FontWeight="SemiBold"
+                                        Foreground="White" Cursor="Hand"
+                                        VerticalAlignment="Center">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border x:Name="Bd"
+                                                                Background="{Binding ButtonColor}"
+                                                                CornerRadius="4"
+                                                                Padding="8,4">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsEnabled" Value="False">
+                                                                <Setter TargetName="Bd" Property="Opacity" Value="0.5"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <!-- Color Preview (left) -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,12,0" VerticalAlignment="Center">
+                                    <Border Width="40" Height="40" CornerRadius="6">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="{Binding PreviewColor1}" Offset="0"/>
+                                                <GradientStop Color="{Binding PreviewColor2}" Offset="0.5"/>
+                                                <GradientStop Color="{Binding AccentColorValue}" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- Name + Description + Price -->
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{Binding NameColor}"/>
+                                        <TextBlock Text="{Binding ActiveLabel}"
+                                                   FontSize="11" FontWeight="Bold"
+                                                   Foreground="#2ECC71"
+                                                   VerticalAlignment="Center"
+                                                   Margin="8,0,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Description}"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource SubTextColor}"/>
+                                    <TextBlock Text="{Binding PriceText}"
+                                               FontSize="11"
+                                               Foreground="{Binding PriceColor}"
+                                               Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Window>

@@ -381,6 +381,17 @@ public partial class LogViewerWindow : Window
             Menu_FillReport_Click(sender, e);
             e.Handled = true;
         }
+        else if (e.Key == System.Windows.Input.Key.F12
+            && System.Windows.Input.Keyboard.Modifiers == (System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Shift))
+        {
+            if (DiagnosticsWindow.CanAccess())
+            {
+                var existing = System.Windows.Application.Current.Windows.OfType<DiagnosticsWindow>().FirstOrDefault();
+                if (existing != null) { existing.Activate(); }
+                else { var w = new DiagnosticsWindow(); w.Show(); w.Activate(); }
+            }
+            e.Handled = true;
+        }
     }
 
     #region Menu Handlers
@@ -418,6 +429,12 @@ public partial class LogViewerWindow : Window
     {
         if (App.Current is App app)
             app.ShowStatsDashboard();
+    }
+
+    private void Menu_ThemeShop_Click(object sender, RoutedEventArgs e)
+    {
+        if (App.Current is App app)
+            app.ShowThemeShop();
     }
 
     private void Menu_EditProfile_Click(object sender, RoutedEventArgs e)

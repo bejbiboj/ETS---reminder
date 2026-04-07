@@ -203,6 +203,7 @@
                     </MenuItem>
                     <MenuItem Header="_Tools" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
                         <MenuItem Header="_Stats Dashboard" Click="Menu_Stats_Click"/>
+                        <MenuItem Header="_Theme Shop" Click="Menu_ThemeShop_Click"/>
                         <MenuItem Header="_Edit Profile" Click="Menu_EditProfile_Click"/>
                         <Separator/>
                         <MenuItem Header="_Settings" Click="Menu_Settings_Click"/>
