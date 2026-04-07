@@ -28,6 +28,17 @@ public partial class App : Application
 
         ThemeManager.ApplyTheme(AppSettings.Instance.DarkMode);
 
+        // Show profile setup on first launch
+        if (!UserProfile.Exists)
+        {
+            var setup = new ProfileSetupWindow();
+            if (setup.ShowDialog() != true)
+            {
+                Current.Shutdown();
+                return;
+            }
+        }
+
         SetupTrayIcon();
         SetupTimer();
 
@@ -56,6 +67,8 @@ public partial class App : Application
         contextMenu.Items.Add("View Report Logs", null, (_, _) => ShowLogViewerWindow());
         contextMenu.Items.Add("Open Reports Folder", null, (_, _) => OpenReportsFolder());
         contextMenu.Items.Add("-");
+        contextMenu.Items.Add("Stats Dashboard", null, (_, _) => ShowStatsDashboard());
+        contextMenu.Items.Add("Edit Profile", null, (_, _) => ShowEditProfile());
         contextMenu.Items.Add("Settings", null, (_, _) => ShowSettingsWindow());
         contextMenu.Items.Add("-");
         contextMenu.Items.Add("Exit", null, (_, _) => ExitApp());
@@ -245,6 +258,29 @@ public partial class App : Application
 
         var window = new SettingsWindow();
         window.ShowDialog();
+    }
+
+    public void ShowStatsDashboard()
+    {
+        var existing = Current.Windows.OfType<StatsDashboardWindow>().FirstOrDefault();
+        if (existing != null)
+        {
+            existing.Activate();
+            return;
+        }
+
+        var window = new StatsDashboardWindow();
+        window.Show();
+        window.Activate();
+    }
+
+    public void ShowEditProfile()
+    {
+        var profile = UserProfile.Instance;
+        if (profile == null) return;
+
+        var setup = new ProfileSetupWindow(profile);
+        setup.ShowDialog();
     }
 
     public static void OpenReportsFolder()

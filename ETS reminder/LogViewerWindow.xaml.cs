@@ -17,6 +17,22 @@ public partial class LogViewerWindow : Window
         AddEntryDatePicker.SelectedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, App.AppTimeZone);
         LoadMonths();
         SetupSearchTimer();
+        LoadProfileIndicator();
+    }
+
+    private void LoadProfileIndicator()
+    {
+        var profile = UserProfile.Instance;
+        if (profile == null) return;
+
+        MenuProfileName.Text = profile.DisplayName;
+        MenuAvatarInitials.Text = profile.Initials;
+        MenuAvatar.Background = new System.Windows.Media.SolidColorBrush(
+            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(profile.AvatarColor));
+
+        var stats = StatsEngine.Calculate();
+        if (stats.CurrentStreak > 0)
+            MenuStreakText.Text = $"\U0001f525 {stats.CurrentStreak}";
     }
 
     private void SetupSearchTimer()
@@ -380,6 +396,27 @@ public partial class LogViewerWindow : Window
     {
         if (App.Current is App app)
             app.ShowSettingsWindow();
+    }
+
+    private void Menu_Stats_Click(object sender, RoutedEventArgs e)
+    {
+        if (App.Current is App app)
+            app.ShowStatsDashboard();
+    }
+
+    private void Menu_EditProfile_Click(object sender, RoutedEventArgs e)
+    {
+        if (App.Current is App app)
+        {
+            app.ShowEditProfile();
+            LoadProfileIndicator();
+        }
+    }
+
+    private void ProfileIndicator_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (App.Current is App app)
+            app.ShowStatsDashboard();
     }
 
     #endregion

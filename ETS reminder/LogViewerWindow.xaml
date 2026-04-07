@@ -106,23 +106,60 @@
         </Grid.RowDefinitions>
 
         <!-- Menu Bar -->
-        <Menu Grid.Row="0" Background="{DynamicResource MenuBackground}" Foreground="{DynamicResource TextColor}" FontSize="13" Padding="2">
-            <MenuItem Header="_File" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
-                <MenuItem Header="_Fill ETS Report" InputGestureText="Ctrl+N" Click="Menu_FillReport_Click"/>
-                <MenuItem Header="_Open Reports Folder" Click="Menu_OpenFolder_Click"/>
-                <Separator/>
-                <MenuItem Header="E_xit" InputGestureText="Alt+F4" Click="Menu_Exit_Click"/>
-            </MenuItem>
-            <MenuItem Header="_Reports" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
-                <MenuItem Header="_Search Reports" InputGestureText="Ctrl+F" Click="Menu_Search_Click"/>
-                <Separator/>
-                <MenuItem Header="_Copy Month" Click="CopyMonth_Click" x:Name="MenuCopyMonth"/>
-                <MenuItem Header="_Delete Month" Click="DeleteMonth_Click" x:Name="MenuDeleteMonth"/>
-            </MenuItem>
-            <MenuItem Header="_Tools" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
-                <MenuItem Header="_Settings" Click="Menu_Settings_Click"/>
-            </MenuItem>
-        </Menu>
+        <DockPanel Grid.Row="0" Background="{DynamicResource MenuBackground}">
+            <Menu Background="Transparent" Foreground="{DynamicResource TextColor}" FontSize="13" Padding="2"
+                  VerticalAlignment="Center">
+                <MenuItem Header="_File" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
+                    <MenuItem Header="_Fill ETS Report" InputGestureText="Ctrl+N" Click="Menu_FillReport_Click"/>
+                    <MenuItem Header="_Open Reports Folder" Click="Menu_OpenFolder_Click"/>
+                    <Separator/>
+                    <MenuItem Header="E_xit" InputGestureText="Alt+F4" Click="Menu_Exit_Click"/>
+                </MenuItem>
+                <MenuItem Header="_Reports" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
+                    <MenuItem Header="_Search Reports" InputGestureText="Ctrl+F" Click="Menu_Search_Click"/>
+                    <Separator/>
+                    <MenuItem Header="_Copy Month" Click="CopyMonth_Click" x:Name="MenuCopyMonth"/>
+                    <MenuItem Header="_Delete Month" Click="DeleteMonth_Click" x:Name="MenuDeleteMonth"/>
+                </MenuItem>
+                <MenuItem Header="_Tools" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
+                    <MenuItem Header="_Stats Dashboard" Click="Menu_Stats_Click"/>
+                    <MenuItem Header="_Edit Profile" Click="Menu_EditProfile_Click"/>
+                    <Separator/>
+                    <MenuItem Header="_Settings" Click="Menu_Settings_Click"/>
+                </MenuItem>
+            </Menu>
+
+            <!-- Profile indicator (right side of menu bar) -->
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
+                        HorizontalAlignment="Right" Margin="0,0,10,0"
+                        VerticalAlignment="Center" Cursor="Hand"
+                        MouseLeftButtonDown="ProfileIndicator_Click">
+                <Border x:Name="MenuAvatar"
+                        Width="24" Height="24"
+                        CornerRadius="12"
+                        Background="#E67E22"
+                        VerticalAlignment="Center">
+                    <TextBlock x:Name="MenuAvatarInitials"
+                               Text="?"
+                               FontSize="10" FontWeight="Bold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock x:Name="MenuProfileName"
+                           Text=""
+                           FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextColor}"
+                           VerticalAlignment="Center"
+                           Margin="6,0,0,0"/>
+                <TextBlock x:Name="MenuStreakText"
+                           Text=""
+                           FontSize="11"
+                           Foreground="#E67E22"
+                           VerticalAlignment="Center"
+                           Margin="8,0,0,0"/>
+            </StackPanel>
+        </DockPanel>
 
         <!-- Search Bar -->
         <Border Grid.Row="1" Background="{DynamicResource PanelBackground}" Padding="10" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
