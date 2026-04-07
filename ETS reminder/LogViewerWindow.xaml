@@ -4,6 +4,7 @@
         Title="ETS Report Logs"
         Width="900" Height="600"
         WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         Background="{DynamicResource WindowBackground}"
         PreviewKeyDown="Window_PreviewKeyDown">
@@ -96,17 +97,91 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style TargetType="Button" x:Key="TitleBarButton">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PanelBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Button" x:Key="TitleBarCloseButton" BasedOn="{StaticResource TitleBarButton}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E74C3C"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Custom Title Bar -->
+        <Border Grid.Row="0" Background="{DynamicResource MenuBackground}"
+                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <DockPanel Height="32">
+                <!-- Window icon + title -->
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Margin="8,0,0,0" VerticalAlignment="Center">
+                    <Border Width="18" Height="18" CornerRadius="3" Background="#F57C00" VerticalAlignment="Center">
+                        <TextBlock Text="E" FontSize="11" FontWeight="Bold" Foreground="White"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="ETS Report Logs" FontSize="12"
+                               Foreground="{DynamicResource TextColor}"
+                               VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <!-- Window control buttons -->
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="&#x2015;" Style="{StaticResource TitleBarButton}" Click="Minimize_Click"
+                            FontSize="10" ToolTip="Minimize"/>
+                    <Button x:Name="MaximizeButton" Content="&#x25A1;" Style="{StaticResource TitleBarButton}" Click="Maximize_Click"
+                            FontSize="12" ToolTip="Maximize"/>
+                    <Button Content="&#x2715;" Style="{StaticResource TitleBarCloseButton}" Click="Close_Click"
+                            FontSize="12" ToolTip="Close"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
         <!-- Menu Bar -->
-        <DockPanel Grid.Row="0" Background="{DynamicResource MenuBackground}">
+        <DockPanel Grid.Row="1" Background="{DynamicResource MenuBackground}">
             <Menu Background="Transparent" Foreground="{DynamicResource TextColor}" FontSize="13" Padding="2"
                   VerticalAlignment="Center">
                 <MenuItem Header="_File" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
@@ -162,7 +237,7 @@
         </DockPanel>
 
         <!-- Search Bar -->
-        <Border Grid.Row="1" Background="{DynamicResource PanelBackground}" Padding="10" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+        <Border Grid.Row="2" Background="{DynamicResource PanelBackground}" Padding="10" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
             <DockPanel>
                 <Button DockPanel.Dock="Right"
                         Content="Clear"
@@ -188,7 +263,7 @@
             </DockPanel>
         </Border>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="*"/>

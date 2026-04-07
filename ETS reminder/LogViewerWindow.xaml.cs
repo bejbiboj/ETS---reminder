@@ -437,6 +437,38 @@ public partial class LogViewerWindow : Window
 
     #endregion
 
+    #region Title Bar
+
+    private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            Maximize_Click(sender, e);
+        }
+        else
+        {
+            DragMove();
+        }
+    }
+
+    private void Minimize_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void Maximize_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        MaximizeButton.Content = WindowState == WindowState.Maximized ? "\u2752" : "\u25A1";
+    }
+
+    private void Close_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    #endregion
+
     private void DeleteMonth_Click(object sender, RoutedEventArgs e)
     {
         if (MonthsListBox.SelectedItem is not ListBoxItem item)
