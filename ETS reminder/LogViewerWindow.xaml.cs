@@ -211,11 +211,6 @@ public partial class LogViewerWindow : Window
         AddEntryTextBox.Text = "VACATION";
     }
 
-    private void QuickAdd_WFH_Click(object sender, RoutedEventArgs e)
-    {
-        AddEntryTextBox.Text = "WFH - Working from home";
-    }
-
     private void SaveEntry_Click(object sender, RoutedEventArgs e)
     {
         if (AddEntryDatePicker.SelectedDate is not { } selectedDate)
@@ -399,6 +394,11 @@ public partial class LogViewerWindow : Window
             Menu_FillReport_Click(sender, e);
             e.Handled = true;
         }
+        else if (e.Key == System.Windows.Input.Key.B && System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control)
+        {
+            Menu_BulkEntry_Click(sender, e);
+            e.Handled = true;
+        }
         else if (e.Key == System.Windows.Input.Key.F12
             && System.Windows.Input.Keyboard.Modifiers == (System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Shift))
         {
@@ -418,6 +418,27 @@ public partial class LogViewerWindow : Window
     {
         if (App.Current is App app)
             app.ShowReportWindow();
+    }
+
+    private void Menu_BulkEntry_Click(object sender, RoutedEventArgs e)
+    {
+        var existing = System.Windows.Application.Current.Windows.OfType<BulkEntryWindow>().FirstOrDefault();
+        if (existing != null)
+        {
+            existing.Activate();
+            return;
+        }
+
+        var bulkWindow = new BulkEntryWindow();
+        bulkWindow.EntriesSaved += (s, args) =>
+        {
+            RefreshCurrentMonth();
+            LoadMonths();
+            LoadProfileIndicator();
+            App.CheckAchievements();
+        };
+        bulkWindow.Show();
+        bulkWindow.Activate();
     }
 
     private void Menu_OpenFolder_Click(object sender, RoutedEventArgs e)

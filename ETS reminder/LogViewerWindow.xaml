@@ -191,7 +191,8 @@
                       VerticalAlignment="Center">
                     <MenuItem Header="_File" ItemContainerStyle="{StaticResource ThemedMenuItemStyle}">
                         <MenuItem Header="_Fill ETS Report" InputGestureText="Ctrl+N" Click="Menu_FillReport_Click"/>
-                        <MenuItem Header="_Open Reports Folder" Click="Menu_OpenFolder_Click"/>
+                            <MenuItem Header="_Bulk Entry" InputGestureText="Ctrl+B" Click="Menu_BulkEntry_Click"/>
+                            <MenuItem Header="_Open Reports Folder" Click="Menu_OpenFolder_Click"/>
                         <Separator/>
                         <MenuItem Header="E_xit" InputGestureText="Alt+F4" Click="Menu_Exit_Click"/>
                     </MenuItem>
@@ -346,7 +347,7 @@
                         <Button Content="HOLIDAY" Style="{StaticResource QuickAddButton}" Click="QuickAdd_Holiday_Click"/>
                         <Button Content="SICK LEAVE" Style="{StaticResource QuickAddButton}" Click="QuickAdd_SickLeave_Click"/>
                         <Button Content="VACATION" Style="{StaticResource QuickAddButton}" Click="QuickAdd_Vacation_Click"/>
-                        <Button Content="WFH" Style="{StaticResource QuickAddButton}" Click="QuickAdd_WFH_Click"/>
+                        <Button Content="Bulk Entry" Style="{StaticResource QuickAddButton}" Click="Menu_BulkEntry_Click" ToolTip="Fill multiple days at once (Ctrl+B)"/>
                     </StackPanel>
                     <DockPanel DockPanel.Dock="Top">
                         <Button DockPanel.Dock="Right"

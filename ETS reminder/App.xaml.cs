@@ -65,6 +65,7 @@ public partial class App : Application
 
         var contextMenu = new System.Windows.Forms.ContextMenuStrip();
         contextMenu.Items.Add("Fill ETS Report", null, (_, _) => ShowReportWindow());
+        contextMenu.Items.Add("Bulk Entry", null, (_, _) => ShowBulkEntryWindow());
         contextMenu.Items.Add("View Report Logs", null, (_, _) => ShowLogViewerWindow());
         contextMenu.Items.Add("Open Reports Folder", null, (_, _) => OpenReportsFolder());
         contextMenu.Items.Add("-");
@@ -297,6 +298,26 @@ public partial class App : Application
         }
 
         var window = new LogViewerWindow();
+        window.Show();
+        window.Activate();
+    }
+
+    public void ShowBulkEntryWindow()
+    {
+        var existingWindow = Current.Windows.OfType<BulkEntryWindow>().FirstOrDefault();
+        if (existingWindow != null)
+        {
+            existingWindow.Activate();
+            return;
+        }
+
+        var window = new BulkEntryWindow();
+        window.EntriesSaved += (s, e) =>
+        {
+            _reportFilledToday = true;
+            _lastReportDate = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, AppTimeZone));
+            CheckAchievements();
+        };
         window.Show();
         window.Activate();
     }
