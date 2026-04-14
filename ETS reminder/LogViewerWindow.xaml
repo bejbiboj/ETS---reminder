@@ -309,6 +309,14 @@
                         VerticalAlignment="Center"
                         Visibility="Collapsed"/>
                 <Button DockPanel.Dock="Right"
+                        x:Name="ExportExcelButton"
+                        Content="Export Excel"
+                        Style="{StaticResource OrangeButton}"
+                        Click="ExportExcel_Click"
+                        VerticalAlignment="Center"
+                        Margin="0,0,10,0"
+                        Visibility="Collapsed"/>
+                <Button DockPanel.Dock="Right"
                         x:Name="CopyMonthButton"
                         Content="Copy Month"
                         Style="{StaticResource OrangeButton}"
@@ -316,6 +324,13 @@
                         VerticalAlignment="Center"
                         Margin="0,0,10,0"
                         Visibility="Collapsed"/>
+                <Button DockPanel.Dock="Right"
+                        x:Name="NewEntryButton"
+                        Content="New Entry"
+                        Style="{StaticResource OrangeButton}"
+                        Click="NewEntry_Click"
+                        VerticalAlignment="Center"
+                        Margin="0,0,10,0"/>
                 <TextBlock x:Name="MonthHeader"
                            Text="Select a month to view logs"
                            FontSize="20" FontWeight="Bold"

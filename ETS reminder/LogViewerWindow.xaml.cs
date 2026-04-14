@@ -112,6 +112,7 @@ public partial class LogViewerWindow : Window
         ClearSearchButton.Visibility = Visibility.Visible;
         CopyMonthButton.Visibility = Visibility.Collapsed;
         DeleteMonthButton.Visibility = Visibility.Collapsed;
+        ExportExcelButton.Visibility = Visibility.Collapsed;
         MonthsListBox.SelectedItem = null;
     }
 
@@ -182,6 +183,7 @@ public partial class LogViewerWindow : Window
         MonthHeader.Text = monthDate.ToString("MMMM yyyy");
         DeleteMonthButton.Visibility = Visibility.Visible;
         CopyMonthButton.Visibility = Visibility.Visible;
+        ExportExcelButton.Visibility = Visibility.Visible;
 
         var reports = ReportStorage.GetReportsForMonth(year, month);
         var items = reports.Select(r => new ReportLogItem
@@ -191,7 +193,7 @@ public partial class LogViewerWindow : Window
             DayOfWeek = r.Date.ToString("dddd"),
             ContentPreview = r.Content.Length > 100 ? r.Content[..100] + "\u2026" : r.Content,
             FullContent = r.Content
-        }).ToList();
+        }).OrderByDescending(r => r.Date).ToList();
 
         ReportListView.ItemsSource = items;
     }
@@ -420,6 +422,12 @@ public partial class LogViewerWindow : Window
             app.ShowReportWindow();
     }
 
+    private void NewEntry_Click(object sender, RoutedEventArgs e)
+    {
+        if (App.Current is App app)
+            app.ShowReportWindow();
+    }
+
     private void Menu_BulkEntry_Click(object sender, RoutedEventArgs e)
     {
         var existing = System.Windows.Application.Current.Windows.OfType<BulkEntryWindow>().FirstOrDefault();
@@ -548,6 +556,7 @@ public partial class LogViewerWindow : Window
         // Refresh the months list and clear the view
         DeleteMonthButton.Visibility = Visibility.Collapsed;
         CopyMonthButton.Visibility = Visibility.Collapsed;
+        ExportExcelButton.Visibility = Visibility.Collapsed;
         MonthHeader.Text = "Select a month to view logs";
         ReportListView.ItemsSource = null;
         LoadMonths();
@@ -569,6 +578,31 @@ public partial class LogViewerWindow : Window
 
         var monthDate = new DateTime(year, month, 1);
         var sb = new System.Text.StringBuilder();
+
+        // Copilot prompt
+        sb.AppendLine("Rewrite each of the following daily work reports. Follow these rules strictly:");
+        sb.AppendLine("1. For each WORKING day (non-leave), split the report into exactly TWO professional paragraphs labeled Block 1 and Block 2, each representing a 4-hour work block.");
+        sb.AppendLine("2. Keep ALL technical details, tool names, ticket numbers, and specific actions. Do not generalize or remove details.");
+        sb.AppendLine("3. For LEAVE days (entries starting with HOLIDAY, SICK, or VACATION), also output exactly TWO blocks (Block 1 and Block 2) with the same leave description in each.");
+        sb.AppendLine("4. Process EVERY SINGLE DAY. Do NOT skip any day. Do NOT stop early. Do NOT ask if I want you to continue.");
+        sb.AppendLine("5. Do NOT use any markdown formatting such as ** or * in the output. Plain text only.");
+        sb.AppendLine("6. Use this EXACT output format for each entry:");
+        sb.AppendLine();
+        sb.AppendLine("[MMM dd yyyy | Block 1]");
+        sb.AppendLine("First 4-hour block description paragraph here.");
+        sb.AppendLine();
+        sb.AppendLine("[MMM dd yyyy | Block 2]");
+        sb.AppendLine("Second 4-hour block description paragraph here.");
+        sb.AppendLine();
+        sb.AppendLine("Example for a leave day:");
+        sb.AppendLine("[Apr 10 2026 | Block 1]");
+        sb.AppendLine("HOLIDAY - Easter");
+        sb.AppendLine();
+        sb.AppendLine("[Apr 10 2026 | Block 2]");
+        sb.AppendLine("HOLIDAY - Easter");
+        sb.AppendLine();
+        sb.AppendLine("--- BEGIN REPORTS ---");
+        sb.AppendLine();
         sb.AppendLine($"ETS Reports - {monthDate:MMMM yyyy}");
         sb.AppendLine(new string('=', 40));
         sb.AppendLine();
@@ -581,8 +615,27 @@ public partial class LogViewerWindow : Window
             sb.AppendLine();
         }
 
+        sb.AppendLine("--- END REPORTS ---");
+
         System.Windows.Clipboard.SetText(sb.ToString());
-        MessageBox.Show($"Copied {reports.Count} report(s) for {monthDate:MMMM yyyy} to clipboard.",
-            "Copied", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(
+            $"Copied {reports.Count} report(s) for {monthDate:MMMM yyyy} with Copilot prompt to clipboard.\n\n" +
+            "Paste this into Copilot Chat to get polished reports.\n" +
+            "Then use \"Export Excel\" to generate the import file.",
+            "Copied for Copilot", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void ExportExcel_Click(object sender, RoutedEventArgs e)
+    {
+        var existing = System.Windows.Application.Current.Windows.OfType<ExcelExportWindow>().FirstOrDefault();
+        if (existing != null)
+        {
+            existing.Activate();
+            return;
+        }
+
+        var window = new ExcelExportWindow();
+        window.Show();
+        window.Activate();
     }
 }
