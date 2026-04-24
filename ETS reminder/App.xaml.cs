@@ -81,35 +81,66 @@ public partial class App : Application
 
     private static System.Drawing.Icon CreateAppIcon(int size)
     {
-        using var bitmap = new System.Drawing.Bitmap(size, size);
+        // Render at a larger size for quality, then scale down
+        var renderSize = Math.Max(size, 64);
+        using var bitmap = new System.Drawing.Bitmap(renderSize, renderSize);
         using (var g = System.Drawing.Graphics.FromImage(bitmap))
         {
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
 
-            // Orange background - matches app.ico
-            g.Clear(System.Drawing.Color.FromArgb(255, 245, 124, 0));
+            // Rounded orange background
+            var radius = renderSize * 0.15f;
+            using var bgBrush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, 245, 124, 0));
+            using var path = new System.Drawing.Drawing2D.GraphicsPath();
+            var rect = new System.Drawing.RectangleF(0, 0, renderSize, renderSize);
+            path.AddArc(rect.X, rect.Y, radius * 2, radius * 2, 180, 90);
+            path.AddArc(rect.Right - radius * 2, rect.Y, radius * 2, radius * 2, 270, 90);
+            path.AddArc(rect.Right - radius * 2, rect.Bottom - radius * 2, radius * 2, radius * 2, 0, 90);
+            path.AddArc(rect.X, rect.Bottom - radius * 2, radius * 2, radius * 2, 90, 90);
+            path.CloseFigure();
+            g.FillPath(bgBrush, path);
 
-            // Draw "ETS" text in white
-            var fontSize = size * 0.38f;
-            using var font = new System.Drawing.Font("Arial Black", fontSize, System.Drawing.FontStyle.Bold);
-            using var brush = new System.Drawing.SolidBrush(System.Drawing.Color.White);
+            // Draw "E" centered — cleaner than "ETS" at small sizes
+            var fontSize = renderSize * 0.55f;
+            using var font = new System.Drawing.Font("Segoe UI", fontSize, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel);
+            using var textBrush = new System.Drawing.SolidBrush(System.Drawing.Color.White);
             using var format = new System.Drawing.StringFormat
             {
                 Alignment = System.Drawing.StringAlignment.Center,
                 LineAlignment = System.Drawing.StringAlignment.Center
             };
+            g.DrawString("E", font, textBrush, new System.Drawing.RectangleF(0, 0, renderSize, renderSize), format);
+        }
 
-            g.DrawString("ETS", font, brush, new System.Drawing.RectangleF(0, 0, size, size), format);
-        }
-        var hIcon = bitmap.GetHicon();
-        try
+        // Scale down to requested size if needed
+        System.Drawing.Bitmap finalBitmap;
+        if (renderSize != size)
         {
-            return (System.Drawing.Icon)System.Drawing.Icon.FromHandle(hIcon).Clone();
+            finalBitmap = new System.Drawing.Bitmap(size, size);
+            using var g2 = System.Drawing.Graphics.FromImage(finalBitmap);
+            g2.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g2.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            g2.DrawImage(bitmap, 0, 0, size, size);
         }
-        finally
+        else
         {
-            DestroyIcon(hIcon);
+            finalBitmap = (System.Drawing.Bitmap)bitmap.Clone();
+        }
+
+        using (finalBitmap)
+        {
+            var hIcon = finalBitmap.GetHicon();
+            try
+            {
+                return (System.Drawing.Icon)System.Drawing.Icon.FromHandle(hIcon).Clone();
+            }
+            finally
+            {
+                DestroyIcon(hIcon);
+            }
         }
     }
 

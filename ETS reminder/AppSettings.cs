@@ -12,7 +12,7 @@ public class AppSettings
     public int ReminderMinute { get; set; } = 0;
     public string TimeZoneId { get; set; } = "Central European Standard Time";
     public bool DarkMode { get; set; } = false;
-    public string ActiveThemeId { get; set; } = "default_dark";
+    public string ActiveThemeId { get; set; } = "default_light";
 
     public TimeZoneInfo GetTimeZone()
     {
